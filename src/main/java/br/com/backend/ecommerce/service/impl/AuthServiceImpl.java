@@ -59,8 +59,11 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public ApiResponse<AuthResponse> logar(AuthRequest request) {
 
+        UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(request.email(),request.senha());
+        Authentication authentication = manager.authenticate(usernamePasswordAuthenticationToken);
+        Usuario usuario = (Usuario) authentication.getPrincipal();
+        if(usuario == null) throw new NotFoundException("Usuario não registrado.");
 
-        Usuario usuario =(Usuario) repository.findByEmail(request.email()).orElseThrow(() -> new NotFoundException("Usuario não registrado."));
         String token = jwtConfig.generateToken(usuario);
         return new ApiResponse<>("Usuario logado com sucesso.",HttpStatus.CREATED.value(), new AuthResponse(null,token));
     }
