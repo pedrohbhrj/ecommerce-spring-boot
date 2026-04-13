@@ -6,7 +6,9 @@ import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.UUID;
+import java.util.List;
 
 @Entity
 @Getter
@@ -23,6 +25,9 @@ public class Pedido {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_cliente")
     private Usuario cliente;
+
+    @OneToMany(mappedBy = "pedido",cascade = CascadeType.ALL,orphanRemoval = true)
+    private List<ItemPedido> itemPedidoList = new ArrayList<>();
 
     @Column(nullable = false)
     private BigDecimal precoTotal;

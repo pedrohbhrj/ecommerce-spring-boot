@@ -5,6 +5,8 @@ import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -22,6 +24,10 @@ public class Produto {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_vendedor")
     private Usuario vendedor;
+
+    @OneToMany(mappedBy = "produto",cascade = CascadeType.ALL,orphanRemoval = true)
+    private List<ItemPedido> itemPedidoList = new ArrayList<>();
+
 
     @Column(nullable = false,length = 50)
     private String nome;
