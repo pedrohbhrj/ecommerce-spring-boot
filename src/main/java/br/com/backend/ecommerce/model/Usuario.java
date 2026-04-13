@@ -19,7 +19,7 @@ import java.util.UUID;
 public class Usuario {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     private String nomeCompleto;
@@ -33,6 +33,7 @@ public class Usuario {
     private LocalDate dataNascimento;
 
     @OneToMany(mappedBy = "cliente",cascade = CascadeType.ALL,orphanRemoval = true)
+    @MapKeyColumn(name = "tipo_endereco")
     private Map<String,Endereco> endereco = new HashMap<>();
 
     @Column(nullable = false)

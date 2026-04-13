@@ -1,11 +1,10 @@
 package br.com.backend.ecommerce.model;
 
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
 import lombok.*;
+
+import java.util.UUID;
 
 @Entity
 @Getter
@@ -15,6 +14,10 @@ import lombok.*;
 @Builder
 public class Endereco {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
+    @Column(nullable = false)
     private String cep;
     private String rua;
     private String cidade;
