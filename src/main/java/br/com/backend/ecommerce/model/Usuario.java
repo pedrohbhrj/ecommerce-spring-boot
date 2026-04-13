@@ -6,9 +6,7 @@ import lombok.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 @Entity
 @Getter
@@ -35,6 +33,9 @@ public class Usuario {
     @OneToMany(mappedBy = "cliente",cascade = CascadeType.ALL,orphanRemoval = true)
     @MapKeyColumn(name = "tipo_endereco")
     private Map<String,Endereco> endereco = new HashMap<>();
+
+    @OneToMany(mappedBy = "vendedor",cascade = CascadeType.ALL,orphanRemoval = true)
+    private List<Produto> produtos = new ArrayList<>();
 
     @Column(nullable = false)
     private String senha;
