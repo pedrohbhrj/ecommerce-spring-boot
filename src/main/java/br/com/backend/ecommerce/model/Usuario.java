@@ -37,6 +37,9 @@ public class Usuario {
     @OneToMany(mappedBy = "vendedor",cascade = CascadeType.ALL,orphanRemoval = true)
     private List<Produto> produtos = new ArrayList<>();
 
+    @OneToMany(mappedBy = "cliente",cascade = CascadeType.ALL,orphanRemoval = true)
+    private List<Pedido> pedidos = new ArrayList<>();
+
     @Column(nullable = false)
     private String senha;
 
