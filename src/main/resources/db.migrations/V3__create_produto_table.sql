@@ -5,8 +5,8 @@ create table produto(
     preco DECIMAL(10,2) not null,
     quantidade_estoque INTEGER not null,
     img_url varchar(255) null,
-    criado_em timestamp not null not update,
-    atualizado_em timestamp not null,
+    criado_em timestamp not null default CURRENT_TIMESTAMP,
+    atualizado_em timestamp not null default CURRENT_TIMESTAMP,
     id_vendedor UUID
 
     CONSTRAINT fk_vendedor

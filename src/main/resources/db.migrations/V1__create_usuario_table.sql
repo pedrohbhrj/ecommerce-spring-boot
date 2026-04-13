@@ -6,6 +6,6 @@ create table usuario(
     cpf varchar(255) unique null,
     data_nascimento date null,
     role varchar(30) not null,
-    criado_em timestamp not null not update,
-    atualizado_em timestamp not null
+    criado_em timestamp not null default CURRENT_TIMESTAMP,
+    atualizado_em timestamp not null default CURRENT_TIMESTAMP
 );
