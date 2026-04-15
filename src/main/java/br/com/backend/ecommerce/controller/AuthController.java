@@ -1,6 +1,6 @@
 package br.com.backend.ecommerce.controller;
 
-import br.com.backend.ecommerce.dto.ApiResponse;
+import br.com.backend.ecommerce.exception.ApiResponse;
 import br.com.backend.ecommerce.dto.request.AuthRequest;
 import br.com.backend.ecommerce.dto.response.AuthResponse;
 import br.com.backend.ecommerce.service.interf.AuthService;

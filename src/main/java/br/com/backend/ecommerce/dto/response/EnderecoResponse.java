@@ -1,6 +1,7 @@
 package br.com.backend.ecommerce.dto.response;
 
-public record EnderecoResponse (String cep,
+public record EnderecoResponse (String tipoEndereco,
+                                String cep,
                                 String rua,
                                 String estado,
                                 String cidade,

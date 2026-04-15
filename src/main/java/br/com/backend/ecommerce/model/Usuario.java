@@ -49,13 +49,21 @@ public class Usuario implements UserDetails {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 30)
-    private Role role;
+    @Builder.Default
+    private Role role = Role.CLIENTE;
 
     @Column(nullable = false,updatable = false)
-    private LocalDateTime criadoEm;
+    @Builder.Default
+    private LocalDateTime criadoEm = LocalDateTime.now();
 
     @Column(nullable = false)
-    private LocalDateTime atualizadoEm;
+    @Builder.Default
+    private LocalDateTime atualizadoEm = LocalDateTime.now();
+
+    public Endereco getEnderecoPrincipal(){
+        return this.getEndereco().get("principal");
+    }
+
 
     @PrePersist
     private void prePersist(){
