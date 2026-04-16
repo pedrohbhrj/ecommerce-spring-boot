@@ -34,10 +34,8 @@ public class Usuario implements UserDetails {
 
     private LocalDate dataNascimento;
 
-    @OneToMany(cascade = CascadeType.ALL,orphanRemoval = true)
-    @JoinColumn(name = "cliente_id")
-    @MapKeyColumn(name = "tipo_endereco")
-    private Map<String,Endereco> endereco = new HashMap<>();
+    @OneToMany(mappedBy = "cliente",cascade = CascadeType.ALL,orphanRemoval = true)
+    private List<Endereco> enderecos = new ArrayList<>();
 
     @OneToMany(mappedBy = "vendedor",cascade = CascadeType.ALL,orphanRemoval = true)
     private List<Produto> produtos = new ArrayList<>();
@@ -60,10 +58,6 @@ public class Usuario implements UserDetails {
     @Column(nullable = false)
     @Builder.Default
     private LocalDateTime atualizadoEm = LocalDateTime.now();
-
-    public Endereco getEnderecoPrincipal(){
-        return this.getEndereco().get("principal");
-    }
 
 
     @PrePersist
