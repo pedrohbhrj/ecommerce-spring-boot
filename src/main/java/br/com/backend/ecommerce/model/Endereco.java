@@ -26,4 +26,17 @@ public class Endereco {
     private String complemento;
     private String numeroCasa;
 
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_cliente")
+    private Usuario cliente;
+
+    private boolean principal;
+    private boolean ativo;
+
+    @PrePersist
+    void prePersist(){
+        this.principal = true;
+        this.ativo = true;
+    }
 }
