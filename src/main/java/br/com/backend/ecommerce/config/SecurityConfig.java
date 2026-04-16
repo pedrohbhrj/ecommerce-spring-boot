@@ -31,6 +31,9 @@ public class SecurityConfig{
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(req -> req.requestMatchers(HttpMethod.POST,"/api/auth/**").permitAll()
                         .requestMatchers(HttpMethod.GET,"/api/produto").hasAuthority("CLIENTE")
+                        .requestMatchers(HttpMethod.PATCH,"/api/usuario/**").hasAuthority("CLIENTE")
+                        .requestMatchers(HttpMethod.POST,"/api/usuario/**").hasAuthority("CLIENTE")
+                        .requestMatchers(HttpMethod.GET,"/api/usuario/endereco/**").hasAuthority("CLIENTE")
                         .anyRequest().authenticated())
                 .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();

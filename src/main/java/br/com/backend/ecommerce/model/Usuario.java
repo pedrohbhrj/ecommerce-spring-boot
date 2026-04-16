@@ -34,7 +34,8 @@ public class Usuario implements UserDetails {
 
     private LocalDate dataNascimento;
 
-    @OneToMany(mappedBy = "cliente",cascade = CascadeType.ALL,orphanRemoval = true)
+    @OneToMany(cascade = CascadeType.ALL,orphanRemoval = true)
+    @JoinColumn(name = "cliente_id")
     @MapKeyColumn(name = "tipo_endereco")
     private Map<String,Endereco> endereco = new HashMap<>();
 
@@ -49,13 +50,21 @@ public class Usuario implements UserDetails {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 30)
-    private Role role;
+    @Builder.Default
+    private Role role = Role.CLIENTE;
 
     @Column(nullable = false,updatable = false)
-    private LocalDateTime criadoEm;
+    @Builder.Default
+    private LocalDateTime criadoEm = LocalDateTime.now();
 
     @Column(nullable = false)
-    private LocalDateTime atualizadoEm;
+    @Builder.Default
+    private LocalDateTime atualizadoEm = LocalDateTime.now();
+
+    public Endereco getEnderecoPrincipal(){
+        return this.getEndereco().get("principal");
+    }
+
 
     @PrePersist
     private void prePersist(){

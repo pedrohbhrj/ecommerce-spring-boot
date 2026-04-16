@@ -1,7 +1,7 @@
 package br.com.backend.ecommerce.service.impl;
 
 import br.com.backend.ecommerce.config.JWTConfig;
-import br.com.backend.ecommerce.dto.ApiResponse;
+import br.com.backend.ecommerce.exception.ApiResponse;
 import br.com.backend.ecommerce.dto.request.AuthRequest;
 import br.com.backend.ecommerce.dto.response.AuthResponse;
 import br.com.backend.ecommerce.enums.Role;
@@ -15,8 +15,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 

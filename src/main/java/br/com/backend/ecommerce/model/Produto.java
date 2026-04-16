@@ -44,10 +44,13 @@ public class Produto {
     private String imgUrl;
 
     @Column(nullable = false,updatable = false)
-    private LocalDateTime criadoEm;
+    @Builder.Default
+    private LocalDateTime criadoEm = LocalDateTime.now();
 
     @Column(nullable = false)
-    private LocalDateTime atualizadoEm;
+    @Builder.Default
+    private LocalDateTime atualizadoEm = LocalDateTime.now();
+
 
     @PrePersist
     private void prePersist(){

@@ -1,4 +1,4 @@
-package br.com.backend.ecommerce.dto;
+package br.com.backend.ecommerce.exception;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 
