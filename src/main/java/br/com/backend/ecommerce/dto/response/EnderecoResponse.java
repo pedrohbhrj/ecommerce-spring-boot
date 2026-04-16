@@ -1,6 +1,9 @@
 package br.com.backend.ecommerce.dto.response;
 
-public record EnderecoResponse (String tipoEndereco,
+import java.util.UUID;
+
+public record EnderecoResponse (UUID id,
+                                String tipoEndereco,
                                 String cep,
                                 String rua,
                                 String estado,

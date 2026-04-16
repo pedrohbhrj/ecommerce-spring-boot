@@ -17,7 +17,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Service
@@ -42,16 +44,25 @@ public class UsuarioServiceImpl implements UsuarioService {
     }
 
     @Override
+    @Transactional
     public ApiResponse<List<EnderecoResponse>> meusEnderecos(UUID idUsuario) {
+
+        Usuario usuarioEncontrado = encontrarUsuario(idUsuario);
+
         validaUsuarioLogadoComEncontrado(idUsuario);
+
+        List<EnderecoResponse> enderecoResponses = new ArrayList<>();
+
+        for(Map.Entry<String,Endereco> entry:usuarioEncontrado.getEndereco().entrySet()){
+            EnderecoResponse response = enderecoMapper.toRes(entry.getValue(),entry.getKey());
+            enderecoResponses.add(response);
+        }
+
+
 
         return new ApiResponse<>(
                 "Endereços encontrados com sucesso.",
-                HttpStatus.OK.value(),enderecoRepository
-                .findAllClientAddressById(idUsuario)
-                .stream()
-                .map(enderecoMapper::toRes)
-                .toList()
+                HttpStatus.OK.value(),enderecoResponses
         );
     }
     @Override
@@ -60,19 +71,24 @@ public class UsuarioServiceImpl implements UsuarioService {
 
         validaUsuarioLogadoComEncontrado(idUsuario);
 
+        Usuario usuarioEncontrado = encontrarUsuario(idUsuario);
         Endereco endereco = enderecoMapper.toEntity(request);
+        usuarioEncontrado.getEndereco().put("principal",endereco);
 
-        endereco.setCliente(encontrarUsuario(idUsuario));
 
-        Endereco enderecoSalvo = enderecoRepository.save(endereco);
+        Usuario usuarioComEnderecoSalvo = usuarioRepository.save(usuarioEncontrado);
+
 
         return new ApiResponse<>(
                 "Endereço criado com sucesso.",
-                HttpStatus.CREATED.value(),enderecoMapper.toRes(enderecoSalvo)
+                HttpStatus.CREATED.value(),
+                enderecoMapper.toRes(usuarioComEnderecoSalvo.getEndereco().get("principal"),
+                        "principal")
         );
     }
 
     @Override
+    @Transactional
     public ApiResponse<EnderecoResponse> atualizarEnderecoComoPrincipal(UUID idUsuario ,UUID idEndereco) {
 
         validaUsuarioLogadoComEncontrado(idUsuario);
@@ -80,22 +96,22 @@ public class UsuarioServiceImpl implements UsuarioService {
         Endereco enderecoEncontrado =
                 enderecoRepository
                 .findById(idEndereco).orElseThrow(() -> new NotFoundException("Endereco não encontrado."));
+
         Usuario usuarioEncontrado = encontrarUsuario(idUsuario);
 
-        usuarioEncontrado.getEndereco().put("principal",enderecoEncontrado);
+        usuarioEncontrado.getEndereco().put("Entrega",enderecoEncontrado);
 
         Usuario usuarioSalvo = usuarioRepository.save(usuarioEncontrado);
 
         return new ApiResponse<>("Endereço atualizado com sucesso como principal.",
                 HttpStatus.OK.value(),
-                enderecoMapper.toRes(usuarioSalvo.getEnderecoPrincipal())
+                enderecoMapper.toRes(usuarioSalvo.getEnderecoPrincipal(),"principal")
         );
     }
 
     private void validaUsuarioLogadoComEncontrado(UUID idUsuario){
         Usuario usuarioLogado = usuarioLogado();
-        Usuario usuario = usuarioRepository.findById(idUsuario).orElseThrow(() -> new NotFoundException("Usuario não encontrado."));
-        if(!usuario.getId().equals(usuarioLogado.getId())){
+        if(!idUsuario.equals(usuarioLogado.getId())){
             throw new AccessDeniedException("Acesso não autorizado a informações.");
         }
     }

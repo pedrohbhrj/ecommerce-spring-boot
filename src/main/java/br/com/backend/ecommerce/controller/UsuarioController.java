@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RequestMapping("/api/usuario")
@@ -30,5 +31,9 @@ public class UsuarioController {
     public ResponseEntity<ApiResponse<EnderecoResponse>> atualizarEndereco(@RequestParam("idUsuario") UUID idUsuario,
                                                                            @RequestParam("idEndereco") UUID idEndereco){
         return ResponseEntity.ok(service.atualizarEnderecoComoPrincipal(idUsuario,idEndereco));
+    }
+    @GetMapping("/endereco/{idUsuario}")
+    public ResponseEntity<ApiResponse<List<EnderecoResponse>>> meusEnderecos(@PathVariable UUID idUsuario){
+        return ResponseEntity.ok(service.meusEnderecos(idUsuario));
     }
 }

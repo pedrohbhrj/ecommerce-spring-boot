@@ -34,7 +34,8 @@ public class Usuario implements UserDetails {
 
     private LocalDate dataNascimento;
 
-    @OneToMany(mappedBy = "cliente",cascade = CascadeType.ALL,orphanRemoval = true)
+    @OneToMany(cascade = CascadeType.ALL,orphanRemoval = true)
+    @JoinColumn(name = "cliente_id")
     @MapKeyColumn(name = "tipo_endereco")
     private Map<String,Endereco> endereco = new HashMap<>();
 
