@@ -35,7 +35,6 @@ public class UsuarioServiceImpl implements UsuarioService {
 
 
     @Override
-    @Transactional
     public ApiResponse<List<EnderecoResponse>> meusEnderecos(UUID idUsuario) {
 
         usuarioAuthAuxiliar.validaUsuarioLogadoComEncontrado(idUsuario);
