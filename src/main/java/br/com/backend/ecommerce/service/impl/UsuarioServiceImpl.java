@@ -12,14 +12,10 @@ import br.com.backend.ecommerce.repository.UsuarioRepository;
 import br.com.backend.ecommerce.service.interf.UsuarioService;
 import jakarta.transaction.Transactional;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
+
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 @Service
@@ -28,62 +24,61 @@ public class UsuarioServiceImpl implements UsuarioService {
     private final UsuarioRepository usuarioRepository;
     private final EnderecoRepository enderecoRepository;
     private final EnderecoMapper enderecoMapper;
+    private final UsuarioAuthAuxiliar usuarioAuthAuxiliar;
 
-    public UsuarioServiceImpl(UsuarioRepository usuarioRepository, EnderecoRepository enderecoRepository, EnderecoMapper enderecoMapper) {
+    public UsuarioServiceImpl(UsuarioRepository usuarioRepository, EnderecoRepository enderecoRepository, EnderecoMapper enderecoMapper, UsuarioAuthAuxiliar usuarioAuthAuxiliar) {
         this.usuarioRepository = usuarioRepository;
         this.enderecoRepository = enderecoRepository;
         this.enderecoMapper = enderecoMapper;
+        this.usuarioAuthAuxiliar = usuarioAuthAuxiliar;
     }
 
-
-    @Override
-    public Usuario usuarioLogado() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if(authentication == null) throw new AccessDeniedException("Usuario não está logado, por favor faça login.");
-        return (Usuario) authentication.getPrincipal();
-    }
 
     @Override
     @Transactional
     public ApiResponse<List<EnderecoResponse>> meusEnderecos(UUID idUsuario) {
 
+        usuarioAuthAuxiliar.validaUsuarioLogadoComEncontrado(idUsuario);
+
         Usuario usuarioEncontrado = encontrarUsuario(idUsuario);
-
-        validaUsuarioLogadoComEncontrado(idUsuario);
-
-        List<EnderecoResponse> enderecoResponses = new ArrayList<>();
-
-        for(Map.Entry<String,Endereco> entry:usuarioEncontrado.getEndereco().entrySet()){
-            EnderecoResponse response = enderecoMapper.toRes(entry.getValue(),entry.getKey());
-            enderecoResponses.add(response);
-        }
-
-
 
         return new ApiResponse<>(
                 "Endereços encontrados com sucesso.",
-                HttpStatus.OK.value(),enderecoResponses
+                HttpStatus.OK.value(),
+                enderecoRepository
+                        .findAllByClienteId(usuarioEncontrado.getId())
+                        .stream()
+                        .map(enderecoMapper::toRes)
+                        .toList()
         );
     }
     @Override
     @Transactional
     public ApiResponse<EnderecoResponse> criarEndereco(UUID idUsuario,EnderecoRequest request) {
 
-        validaUsuarioLogadoComEncontrado(idUsuario);
+        usuarioAuthAuxiliar.validaUsuarioLogadoComEncontrado(idUsuario);
 
-        Usuario usuarioEncontrado = encontrarUsuario(idUsuario);
+        Usuario usuario = encontrarUsuario(idUsuario);
+
         Endereco endereco = enderecoMapper.toEntity(request);
-        usuarioEncontrado.getEndereco().put("principal",endereco);
 
+        endereco.setCliente(usuario);
 
-        Usuario usuarioComEnderecoSalvo = usuarioRepository.save(usuarioEncontrado);
+        Endereco enderecoSalvo = enderecoRepository.save(endereco);
 
+        for(Endereco enderecos:usuario.getEnderecos()){
+            if(!enderecos.getId().equals(enderecoSalvo.getId())){
+                enderecos.setPrincipal(false);
+                enderecos.setAtivo(false);
+            }
+        }
+
+        usuarioRepository.save(usuario);
 
         return new ApiResponse<>(
                 "Endereço criado com sucesso.",
                 HttpStatus.CREATED.value(),
-                enderecoMapper.toRes(usuarioComEnderecoSalvo.getEndereco().get("principal"),
-                        "principal")
+                enderecoMapper.toRes(enderecoSalvo)
         );
     }
 
@@ -91,7 +86,7 @@ public class UsuarioServiceImpl implements UsuarioService {
     @Transactional
     public ApiResponse<EnderecoResponse> atualizarEnderecoComoPrincipal(UUID idUsuario ,UUID idEndereco) {
 
-        validaUsuarioLogadoComEncontrado(idUsuario);
+        usuarioAuthAuxiliar.validaUsuarioLogadoComEncontrado(idUsuario);
 
         Endereco enderecoEncontrado =
                 enderecoRepository
@@ -99,24 +94,32 @@ public class UsuarioServiceImpl implements UsuarioService {
 
         Usuario usuarioEncontrado = encontrarUsuario(idUsuario);
 
-        usuarioEncontrado.getEndereco().put("Entrega",enderecoEncontrado);
+        usuarioEncontrado
+                .getEnderecos()
+                .forEach(e -> {
+                    if(e.getId().equals(enderecoEncontrado.getId())){
+                        e.setPrincipal(false);
+                        e.setAtivo(false);
+                    }
+                });
 
         Usuario usuarioSalvo = usuarioRepository.save(usuarioEncontrado);
 
+        Endereco enderecoResponse = null;
+
+        for(Endereco enderecos:usuarioSalvo.getEnderecos()){
+            if(enderecos.getId().equals(enderecoEncontrado.getId())){
+                enderecoResponse = enderecos;
+            }
+        }
+
         return new ApiResponse<>("Endereço atualizado com sucesso como principal.",
                 HttpStatus.OK.value(),
-                enderecoMapper.toRes(usuarioSalvo.getEnderecoPrincipal(),"principal")
+                enderecoMapper.toRes(enderecoResponse)
         );
     }
 
-    private void validaUsuarioLogadoComEncontrado(UUID idUsuario){
-        Usuario usuarioLogado = usuarioLogado();
-        if(!idUsuario.equals(usuarioLogado.getId())){
-            throw new AccessDeniedException("Acesso não autorizado a informações.");
-        }
-    }
-
-    private Usuario encontrarUsuario(UUID idUsuario){
+    public Usuario encontrarUsuario(UUID idUsuario){
         return usuarioRepository.findById(idUsuario).orElseThrow(() -> new NotFoundException("Usuario não encontrado."));
     }
 

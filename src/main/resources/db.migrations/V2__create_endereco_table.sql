@@ -8,7 +8,7 @@ create table endereco(
     complemento varchar(255) null,
     numeroCasa varchar(255) null,
     principal boolean not null default true,
-    ativo boolean not null default false,
+    ativo boolean not null default true,
     id_cliente UUID
 
     CONSTRAINT fk_cliente FOREIGN KEY(id_cliente) REFERENCES usuario(id) ON DELETE CASCADE ALL

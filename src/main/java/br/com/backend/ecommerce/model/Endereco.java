@@ -31,12 +31,9 @@ public class Endereco {
     @JoinColumn(name = "id_cliente")
     private Usuario cliente;
 
-    private boolean principal;
-    private boolean ativo;
+    @Builder.Default
+    private boolean principal = true;
+    @Builder.Default
+    private boolean ativo = true;
 
-    @PrePersist
-    void prePersist(){
-        this.principal = true;
-        this.ativo = true;
-    }
 }

@@ -12,7 +12,8 @@ public interface EnderecoMapper {
 
     @Mapping(target = "id",ignore = true)
     Endereco toEntity(EnderecoRequest request);
-    @Mapping(target = "tipoEndereco",source = "tipoDaChave")
-    EnderecoResponse toRes(Endereco endereco, String tipoDaChave);
+
+
+    EnderecoResponse toRes(Endereco endereco);
 
 }
