@@ -125,7 +125,14 @@ public class UsuarioServiceImpl implements UsuarioService {
 
     @Override
     public ApiResponse<UsuarioResponse> atualizarInformacoesDeUsuario(UUID idUsuario, UsuarioAttRequest request) {
-        return null;
+
+        usuarioAuthAuxiliar.validaUsuarioLogadoComEncontrado(idUsuario);
+
+        Usuario usuarioEncontrado = usuarioAuthAuxiliar.encontrarUsuario(usuarioRepository,idUsuario);
+
+        usuarioMapper.mergeUsuario(usuarioEncontrado,request);
+
+        return new ApiResponse<>("Usuario atualizado com sucesso.",200,usuarioMapper.toRes(usuarioEncontrado));
     }
 
     @Override
@@ -135,12 +142,20 @@ public class UsuarioServiceImpl implements UsuarioService {
 
     @Override
     public ApiResponse<Void> deleteUsuario(UUID idUsuario) {
-        return null;
+
+        usuarioAuthAuxiliar.validaUsuarioLogadoComEncontrado(idUsuario);
+
+        Usuario usuario = usuarioAuthAuxiliar.encontrarUsuario(usuarioRepository,idUsuario);
+
+        usuarioRepository.delete(usuario);
+
+        return new ApiResponse<>("Usuario deletado com sucesso.",200,null);
     }
 
     @Override
     public ApiResponse<EnderecoResponse> enderecoEntrega() {
-        return null;
+        Endereco enderecoEncontrado = enderecoRepository.findByPrincipal(true).orElseThrow(() -> new NotFoundException("Não existe endereco nessa conta , por favor cadastre um."));
+        return new ApiResponse<>("Endereço de entrega encontrado.",200,enderecoMapper.toRes(enderecoEncontrado));
     }
 
 }
