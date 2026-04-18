@@ -1,6 +1,8 @@
 package br.com.backend.ecommerce.service.impl;
 
+import br.com.backend.ecommerce.exception.NotFoundException;
 import br.com.backend.ecommerce.model.Usuario;
+import br.com.backend.ecommerce.repository.UsuarioRepository;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -21,5 +23,8 @@ public class UsuarioAuthAuxiliar {
         if(!idUsuario.equals(usuarioLogado.getId())){
             throw new AccessDeniedException("Acesso não autorizado a informações.");
         }
+    }
+    public Usuario encontrarUsuario(UsuarioRepository repository,UUID idUsuario){
+        return repository.findById(idUsuario).orElseThrow(() -> new NotFoundException("Usuario não encontrado."));
     }
 }

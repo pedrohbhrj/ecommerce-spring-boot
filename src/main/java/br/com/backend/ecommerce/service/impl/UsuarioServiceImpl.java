@@ -1,10 +1,13 @@
 package br.com.backend.ecommerce.service.impl;
 
+import br.com.backend.ecommerce.dto.request.UsuarioAttRequest;
+import br.com.backend.ecommerce.dto.response.UsuarioResponse;
 import br.com.backend.ecommerce.exception.ApiResponse;
 import br.com.backend.ecommerce.dto.request.EnderecoRequest;
 import br.com.backend.ecommerce.dto.response.EnderecoResponse;
 import br.com.backend.ecommerce.exception.NotFoundException;
 import br.com.backend.ecommerce.mapper.EnderecoMapper;
+import br.com.backend.ecommerce.mapper.UsuarioMapper;
 import br.com.backend.ecommerce.model.Endereco;
 import br.com.backend.ecommerce.model.Usuario;
 import br.com.backend.ecommerce.repository.EnderecoRepository;
@@ -25,22 +28,23 @@ public class UsuarioServiceImpl implements UsuarioService {
     private final EnderecoRepository enderecoRepository;
     private final EnderecoMapper enderecoMapper;
     private final UsuarioAuthAuxiliar usuarioAuthAuxiliar;
+    private final UsuarioMapper usuarioMapper;
 
-    public UsuarioServiceImpl(UsuarioRepository usuarioRepository, EnderecoRepository enderecoRepository, EnderecoMapper enderecoMapper, UsuarioAuthAuxiliar usuarioAuthAuxiliar) {
+    public UsuarioServiceImpl(UsuarioRepository usuarioRepository, EnderecoRepository enderecoRepository, EnderecoMapper enderecoMapper, UsuarioAuthAuxiliar usuarioAuthAuxiliar, UsuarioMapper usuarioMapper) {
         this.usuarioRepository = usuarioRepository;
         this.enderecoRepository = enderecoRepository;
         this.enderecoMapper = enderecoMapper;
         this.usuarioAuthAuxiliar = usuarioAuthAuxiliar;
+        this.usuarioMapper = usuarioMapper;
     }
 
 
     @Override
-    @Transactional
     public ApiResponse<List<EnderecoResponse>> meusEnderecos(UUID idUsuario) {
 
         usuarioAuthAuxiliar.validaUsuarioLogadoComEncontrado(idUsuario);
 
-        Usuario usuarioEncontrado = encontrarUsuario(idUsuario);
+        Usuario usuarioEncontrado = usuarioAuthAuxiliar.encontrarUsuario(usuarioRepository,idUsuario);
 
         return new ApiResponse<>(
                 "Endereços encontrados com sucesso.",
@@ -58,7 +62,7 @@ public class UsuarioServiceImpl implements UsuarioService {
 
         usuarioAuthAuxiliar.validaUsuarioLogadoComEncontrado(idUsuario);
 
-        Usuario usuario = encontrarUsuario(idUsuario);
+        Usuario usuario = usuarioAuthAuxiliar.encontrarUsuario(usuarioRepository,idUsuario);
 
         Endereco endereco = enderecoMapper.toEntity(request);
 
@@ -69,7 +73,7 @@ public class UsuarioServiceImpl implements UsuarioService {
         for(Endereco enderecos:usuario.getEnderecos()){
             if(!enderecos.getId().equals(enderecoSalvo.getId())){
                 enderecos.setPrincipal(false);
-                enderecos.setAtivo(false);
+                enderecos.setAtivo(true);
             }
         }
 
@@ -92,14 +96,14 @@ public class UsuarioServiceImpl implements UsuarioService {
                 enderecoRepository
                 .findById(idEndereco).orElseThrow(() -> new NotFoundException("Endereco não encontrado."));
 
-        Usuario usuarioEncontrado = encontrarUsuario(idUsuario);
+        Usuario usuarioEncontrado = usuarioAuthAuxiliar.encontrarUsuario(usuarioRepository,idUsuario);
 
         usuarioEncontrado
                 .getEnderecos()
                 .forEach(e -> {
                     if(e.getId().equals(enderecoEncontrado.getId())){
                         e.setPrincipal(false);
-                        e.setAtivo(false);
+                        e.setAtivo(true);
                     }
                 });
 
@@ -119,8 +123,39 @@ public class UsuarioServiceImpl implements UsuarioService {
         );
     }
 
-    public Usuario encontrarUsuario(UUID idUsuario){
-        return usuarioRepository.findById(idUsuario).orElseThrow(() -> new NotFoundException("Usuario não encontrado."));
+    @Override
+    public ApiResponse<UsuarioResponse> atualizarInformacoesDeUsuario(UUID idUsuario, UsuarioAttRequest request) {
+
+        usuarioAuthAuxiliar.validaUsuarioLogadoComEncontrado(idUsuario);
+
+        Usuario usuarioEncontrado = usuarioAuthAuxiliar.encontrarUsuario(usuarioRepository,idUsuario);
+
+        usuarioMapper.mergeUsuario(usuarioEncontrado,request);
+
+        return new ApiResponse<>("Usuario atualizado com sucesso.",200,usuarioMapper.toRes(usuarioEncontrado));
+    }
+
+    @Override
+    public ApiResponse<UsuarioResponse> encontrarUsuario(UUID idUsuario){
+        return new ApiResponse<>("Usuario encontrado com sucesso.",200,usuarioMapper.toRes(usuarioRepository.findById(idUsuario).orElseThrow(() -> new NotFoundException("Usuario não encontrado."))));
+    }
+
+    @Override
+    public ApiResponse<Void> deleteUsuario(UUID idUsuario) {
+
+        usuarioAuthAuxiliar.validaUsuarioLogadoComEncontrado(idUsuario);
+
+        Usuario usuario = usuarioAuthAuxiliar.encontrarUsuario(usuarioRepository,idUsuario);
+
+        usuarioRepository.delete(usuario);
+
+        return new ApiResponse<>("Usuario deletado com sucesso.",200,null);
+    }
+
+    @Override
+    public ApiResponse<EnderecoResponse> enderecoEntrega() {
+        Endereco enderecoEncontrado = enderecoRepository.findByPrincipal(true).orElseThrow(() -> new NotFoundException("Não existe endereco nessa conta , por favor cadastre um."));
+        return new ApiResponse<>("Endereço de entrega encontrado.",200,enderecoMapper.toRes(enderecoEncontrado));
     }
 
 }
