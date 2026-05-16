@@ -1,0 +1,20 @@
+
+spring:
+  application:
+    name: ecommerce-v1
+  datasource:
+    url: jdbc:postgresql://localhost:5432/ecommerce-db
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:postgres}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: true
+flyway:
+  enabled: true
+jwt:
+  secret:
+    token: ${JWT_SECRET:minha_senha_secreta123}
+logging:
+  level:
+    root: info
