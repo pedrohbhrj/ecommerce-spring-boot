@@ -26,4 +26,27 @@ public class GlobalExceptionHandler {
                 )
         );
     }
+    @ExceptionHandler(NotFoundException.class)
+    public ResponseEntity<CustomErrorDetails> notFoundExceptionHandler(NotFoundException ex,HttpServletRequest request){
+
+        log.error("Entity was not found in the system: ",ex);
+
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND.value())
+                .body(new CustomErrorDetails(ex.getMessage(),
+                        LocalDateTime.now(),
+                        request.getRequestURI(),
+                        HttpStatus.NOT_FOUND.value()));
+    }
+    @ExceptionHandler(AlreadyExistsException.class)
+    public ResponseEntity<CustomErrorDetails> alreadyExistsExceptionHandler(AlreadyExistsException ex,HttpServletRequest request){
+        log.error("Already exists this resource: ",ex);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST.value())
+                .body(new CustomErrorDetails(
+                        ex.getMessage(),
+                        LocalDateTime.now(),
+                        request.getRequestURI(),
+                        HttpStatus.BAD_REQUEST.value()
+                        ));
+    }
 }
