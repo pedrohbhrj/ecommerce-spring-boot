@@ -26,7 +26,9 @@ public class Order {
 
     @Column(nullable = false)
     private BigDecimal total;
+
     @Column(name = "order_status")
+    @Enumerated(EnumType.STRING)
     private OrderStatus orderStatus;
 
     @ManyToOne(fetch = FetchType.LAZY)
