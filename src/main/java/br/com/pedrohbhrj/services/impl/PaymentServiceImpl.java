@@ -103,6 +103,7 @@ public class PaymentServiceImpl implements PaymentService {
 
         Payment paymentSaved = paymentRepository.save(payment);
 
+        log.info("Payment created successfully, id: {}",paymentSaved.getId());
 
         return paymentMapper.toResponse(paymentSaved);
     }
@@ -110,6 +111,7 @@ public class PaymentServiceImpl implements PaymentService {
     @Override
     public PaymentResponse findPaymentById(Long orderId) {
        Payment payment =  paymentRepository.findByOrderId(orderId).orElseThrow(() -> new NotFoundException("Payment not found"));
+       log.info("Payment found successfully, id: {}",payment.getId());
         return paymentMapper.toResponse(payment);
     }
 }
