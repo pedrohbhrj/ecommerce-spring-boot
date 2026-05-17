@@ -24,10 +24,9 @@ public class Order {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
     private BigDecimal total;
 
-    @Column(name = "order_status")
+    @Column(name = "order_status",nullable = false)
     @Enumerated(EnumType.STRING)
     private OrderStatus orderStatus;
 
