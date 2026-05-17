@@ -1,0 +1,31 @@
+
+spring:
+  application:
+    name: ecommerce-v1
+  datasource:
+    url: ${DB_HOST:jdbc:postgresql://localhost:5432/ecommerce-db}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:postgres}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: true
+  main:
+    allow-bean-definition-overriding: true
+
+  flyway:
+    enabled: true
+
+jwt:
+  secret:
+    token: ${JWT_SECRET:senha_super_secreta123}
+
+email:
+  admin: ${EMAIL_ADMIN:admin@gmail.com}
+
+password:
+  admin: ${PASSWORD_ADMIN:admin}
+
+logging:
+  level:
+    root: info

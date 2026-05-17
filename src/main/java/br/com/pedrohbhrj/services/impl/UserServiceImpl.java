@@ -9,6 +9,7 @@ import br.com.pedrohbhrj.repository.UserRepository;
 import br.com.pedrohbhrj.services.interf.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,6 +20,7 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final UserMapper userMapper;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     @Transactional(readOnly = true)
@@ -37,6 +39,8 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findById(id).orElseThrow(() -> new NotFoundException("User not found."));
 
         userMapper.mergeUser(request,user);
+
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
 
         User userSaved = userRepository.save(user);
 
