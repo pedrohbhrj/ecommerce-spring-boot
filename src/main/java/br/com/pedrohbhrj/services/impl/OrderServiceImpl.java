@@ -8,15 +8,13 @@ import br.com.pedrohbhrj.exceptions.StockLimitExceededException;
 import br.com.pedrohbhrj.models.*;
 import br.com.pedrohbhrj.models.enums.OrderStatus;
 import br.com.pedrohbhrj.models.enums.PaymentStatus;
-import br.com.pedrohbhrj.repository.OrderItemRepository;
-import br.com.pedrohbhrj.repository.OrderRepository;
-import br.com.pedrohbhrj.repository.PaymentRepository;
-import br.com.pedrohbhrj.repository.ProductRepository;
+import br.com.pedrohbhrj.repository.*;
 import br.com.pedrohbhrj.services.interf.OrderService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,7 +32,6 @@ public class OrderServiceImpl implements OrderService {
     private final OrderRepository orderRepository;
     private final OrderItemRepository orderItemRepository;
     private final ProductRepository productRepository;
-
 
     @Override
     @Transactional
@@ -89,10 +86,13 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional(readOnly = true)
-    public OrderResponse findOrderById(Long orderId) {
+    public OrderResponse findOrderById(User user,Long orderId) {
 
         Order order = orderRepository.findById(orderId).orElseThrow(() -> new NotFoundException("Order not found"));
 
+        if(!order.getUser().getId().equals(user.getId())){
+            throw new AccessDeniedException("Access denied");
+        }
         log.info("Order found , with status: {}",order.getOrderStatus().name());
 
         return new OrderResponse(orderId,order.getOrderStatus(),order.getTotal());

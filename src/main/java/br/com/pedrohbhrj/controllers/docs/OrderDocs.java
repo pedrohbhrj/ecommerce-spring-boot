@@ -42,5 +42,5 @@ public interface OrderDocs {
             @ApiResponse(responseCode = "200", description = "Pedido encontrado com sucesso."),
             @ApiResponse(responseCode = "401", description = "Usuario não autenticado"),
     })
-    ResponseEntity<OrderResponse> myOrder(Long orderId);
+    ResponseEntity<OrderResponse> myOrder(User user,Long orderId);
 }

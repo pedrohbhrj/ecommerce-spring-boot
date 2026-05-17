@@ -37,8 +37,8 @@ public class OrderController implements OrderDocs {
     }
 
     @GetMapping("/{orderId}")
-    public ResponseEntity<OrderResponse> myOrder(@PathVariable Long orderId){
-        return ResponseEntity.ok(orderService.findOrderById(orderId));
+    public ResponseEntity<OrderResponse> myOrder(@AuthenticationPrincipal User user,@PathVariable Long orderId){
+        return ResponseEntity.ok(orderService.findOrderById(user,orderId));
     }
 
 }
