@@ -12,7 +12,7 @@ import java.util.Map;
 public interface OrderService {
     Map<String,String> createOrder(User user, OrderRequest request);
 
-    OrderResponse findOrderById(Long orderId);
+    OrderResponse findOrderById(User user,Long orderId);
 
     Page<OrderResponse> findAllOrders(int page,int size,User user);
 }

@@ -1,6 +1,7 @@
 package br.com.pedrohbhrj.controllers.docs;
 
 import br.com.pedrohbhrj.DTO.response.PaymentResponse;
+import br.com.pedrohbhrj.models.User;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -19,7 +20,7 @@ public interface PaymentDocs {
             @ApiResponse(responseCode = "401", description = "Usuario não autenticado"),
             @ApiResponse(responseCode = "403", description = "Acesso negado")
     })
-    ResponseEntity<PaymentResponse> processPayment(Long orderId);
+    ResponseEntity<PaymentResponse> processPayment(User user, Long orderId);
 
     @SecurityRequirement(name = "Bearer authentication")
     @Operation(summary = "Encontrar pagamento por id.")
@@ -28,5 +29,5 @@ public interface PaymentDocs {
             @ApiResponse(responseCode = "404", description = "Pagamento não encontrado ou pedido não encontrado."),
             @ApiResponse(responseCode = "401", description = "Usuario não autenticado")
     })
-    ResponseEntity<PaymentResponse> findPayment(Long orderId);
+    ResponseEntity<PaymentResponse> findPayment(User user,Long orderId);
 }
