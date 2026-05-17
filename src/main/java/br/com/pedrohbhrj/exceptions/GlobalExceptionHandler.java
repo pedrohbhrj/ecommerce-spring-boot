@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 
+import javax.naming.LimitExceededException;
 import java.time.LocalDateTime;
 
 @RestControllerAdvice
@@ -48,5 +49,17 @@ public class GlobalExceptionHandler {
                         request.getRequestURI(),
                         HttpStatus.BAD_REQUEST.value()
                         ));
+    }
+    @ExceptionHandler(LimitExceededException.class)
+    public ResponseEntity<CustomErrorDetails> limitExceededExceptionHandler(LimitExceededException ex,HttpServletRequest request){
+        log.error("Stock limit exceeded : ",ex);
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST.value())
+                .body(new CustomErrorDetails(
+                        ex.getMessage(),
+                        LocalDateTime.now(),
+                        request.getRequestURI(),
+                        HttpStatus.BAD_REQUEST.value()
+                ));
     }
 }
