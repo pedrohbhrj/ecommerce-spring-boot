@@ -71,5 +71,7 @@ public class AddressServiceImpl implements AddressService {
 
         addressRepository.delete(address);
 
+        log.info("Address deleted successfully");
+
     }
 }
