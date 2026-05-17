@@ -1,5 +1,6 @@
 package br.com.pedrohbhrj.config;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -17,14 +18,18 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 @Configuration
 @EnableWebSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
 
 
     private final SecurityFilter securityFilter;
 
-    public SecurityConfig(SecurityFilter securityFilter){
-        this.securityFilter = securityFilter;
-    }
+    private static final String[] swaggerRoutes = new String[]{
+            "/v3/api-docs/**",
+            "/swagger-ui/**",
+            "/swagger-ui.html",
+            "/error"
+    };
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
@@ -33,16 +38,20 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth ->
-                        auth.requestMatchers(HttpMethod.POST,"/api/auth/**")
-                                .permitAll()
-                                .requestMatchers("/api/test/**").hasAnyRole("ADMIN","USER")
-                                .anyRequest().authenticated())
+                        auth.requestMatchers(swaggerRoutes).permitAll()
+                                .requestMatchers(HttpMethod.POST, "/api/auth/**").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/api/products/**").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/api/categories/**").permitAll()
+                                .requestMatchers("/api/users/**", "/api/users").authenticated()
+                                .requestMatchers("/api/payments/**").authenticated()
+                                .requestMatchers("/api/orders/**").authenticated()
+                                .requestMatchers("/**").hasRole("ADMIN"))
                 .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
 
     @Bean
-    public PasswordEncoder passwordEncoder(){
+    public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
