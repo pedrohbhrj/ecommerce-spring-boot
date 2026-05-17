@@ -1,10 +1,9 @@
 package br.com.pedrohbhrj.services.impl;
 
-import br.com.pedrohbhrj.DTO.request.CategoryRequest;
+
 import br.com.pedrohbhrj.DTO.request.ProductRequest;
 import br.com.pedrohbhrj.DTO.request.ProductUpdateRequest;
 import br.com.pedrohbhrj.DTO.response.ProductResponse;
-import br.com.pedrohbhrj.exceptions.AlreadyExistsException;
 import br.com.pedrohbhrj.exceptions.NotFoundException;
 import br.com.pedrohbhrj.mapper.ProductMapper;
 import br.com.pedrohbhrj.models.Category;
@@ -16,7 +15,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,7 +34,7 @@ public class ProductServiceImpl implements ProductService {
     public ProductResponse createProduct(ProductRequest request) {
 
 
-        Optional<Category> categoryOpt = categoryRepository.findByNameContainingIgnoreCase(request.categoryName());
+        Optional<Category> categoryOpt = categoryRepository.findByNameIgnoreCase(request.categoryName());
 
         Product product = productMapper.toEntity(request);
 
@@ -91,14 +89,21 @@ public class ProductServiceImpl implements ProductService {
 
         PageRequest pageRequest = PageRequest.of(page, size);
 
-        return productRepository.findAll(pageRequest).map(productMapper::toResponse);
+        Page<ProductResponse> productPage = productRepository.findAll(pageRequest).map(productMapper::toResponse);
+
+        log.info("Products paginated successfully");
+
+        return productPage;
     }
 
     @Override
     @Transactional
     public void deleteProduct(Long productId) {
+
         Product productFound = productRepository.findById(productId).orElseThrow(() -> new NotFoundException("Product not found"));
 
         productRepository.delete(productFound);
+
+        log.info("Product deleted successfully");
     }
 }
