@@ -11,6 +11,7 @@ import br.com.pedrohbhrj.repository.AddressRepository;
 import br.com.pedrohbhrj.services.interf.AddressService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,13 +25,15 @@ public class AddressServiceImpl implements AddressService {
 
     @Override
     @Transactional(readOnly = true)
-    public AddressResponse findAddressById(Long addressId) {
+    public AddressResponse findAddressById(User user, Long addressId) {
 
         Address address = addressRepository.findById(addressId).orElseThrow(() -> new NotFoundException("Address not found."));
+        if (!address.getUser().getId().equals(user.getId())) {
+            throw new AccessDeniedException("Access denied.");
+        }
+        log.info("Address {} was found.", addressId);
 
-        log.info("Address was found.");
-
-        return  addressMapper.toResponse(address);
+        return addressMapper.toResponse(address);
     }
 
     @Override
@@ -43,18 +46,20 @@ public class AddressServiceImpl implements AddressService {
 
         Address addressSaved = addressRepository.save(address);
 
-        log.info("Address created successfully, user id: {}",user.getId());
+        log.info("Address created successfully, user id: {}", user.getId());
 
         return addressMapper.toResponse(addressSaved);
     }
 
     @Override
     @Transactional
-    public AddressResponse updateAddress(Long addressId, AddressUpdateRequest request) {
+    public AddressResponse updateAddress(User user, Long addressId, AddressUpdateRequest request) {
 
         Address address = addressRepository.findById(addressId).orElseThrow(() -> new NotFoundException("Address not found."));
-
-        addressMapper.mergeAddress(request,address);
+        if (!address.getUser().getId().equals(user.getId())) {
+            throw new AccessDeniedException("Access denied.");
+        }
+        addressMapper.mergeAddress(request, address);
 
         Address addressSaved = addressRepository.save(address);
 
@@ -65,10 +70,12 @@ public class AddressServiceImpl implements AddressService {
 
     @Override
     @Transactional
-    public void deleteAddress(Long addressId) {
+    public void deleteAddress(User user,Long addressId) {
 
         Address address = addressRepository.findById(addressId).orElseThrow(() -> new NotFoundException("Address not found."));
-
+        if (!address.getUser().getId().equals(user.getId())) {
+            throw new AccessDeniedException("Access denied.");
+        }
         addressRepository.delete(address);
 
         log.info("Address deleted successfully");

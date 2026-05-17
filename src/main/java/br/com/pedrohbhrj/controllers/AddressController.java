@@ -28,19 +28,19 @@ public class AddressController implements AddressDocs {
     }
     @Override
     @GetMapping("/{addressId}")
-    public ResponseEntity<AddressResponse> getAddressById(@PathVariable Long addressId) {
-        return ResponseEntity.ok(addressService.findAddressById(addressId));
+    public ResponseEntity<AddressResponse> getAddressById(@AuthenticationPrincipal User user,@PathVariable Long addressId) {
+        return ResponseEntity.ok(addressService.findAddressById(user,addressId));
     }
     @Override
     @PutMapping("/{addressId}")
-    public ResponseEntity<AddressResponse> updateAddress(@PathVariable Long addressId, @RequestBody AddressUpdateRequest request) {
-        return ResponseEntity.ok(addressService.updateAddress(addressId, request));
+    public ResponseEntity<AddressResponse> updateAddress(@AuthenticationPrincipal User user,@PathVariable Long addressId, @RequestBody AddressUpdateRequest request) {
+        return ResponseEntity.ok(addressService.updateAddress(user,addressId, request));
     }
     @Override
     @DeleteMapping("/{addressId}")
-    public ResponseEntity<Void> deleteAddress(@PathVariable Long addressId) {
+    public ResponseEntity<Void> deleteAddress(@AuthenticationPrincipal User user,@PathVariable Long addressId) {
 
-        addressService.deleteAddress(addressId);
+        addressService.deleteAddress(user,addressId);
 
         return ResponseEntity.noContent().build();
     }

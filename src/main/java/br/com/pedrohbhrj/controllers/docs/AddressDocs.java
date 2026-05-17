@@ -31,7 +31,7 @@ public interface AddressDocs {
             @ApiResponse(responseCode = "401", description = "Usuario não autenticado."),
             @ApiResponse(responseCode = "403", description = "Acesso negado.")
     })
-    ResponseEntity<AddressResponse> getAddressById(Long addressId);
+    ResponseEntity<AddressResponse> getAddressById(User user,Long addressId);
 
     @SecurityRequirement(name = "Bearer authentication")
     @Operation(summary = "Atualizar endereço.")
@@ -41,7 +41,7 @@ public interface AddressDocs {
             @ApiResponse(responseCode = "401", description = "Usuario não autenticado."),
             @ApiResponse(responseCode = "403", description = "Acesso negado.")
     })
-    ResponseEntity<AddressResponse> updateAddress(Long addressId, AddressUpdateRequest request);
+    ResponseEntity<AddressResponse> updateAddress(User user,Long addressId, AddressUpdateRequest request);
 
     @SecurityRequirement(name = "Bearer authentication")
     @Operation(summary = "Deletar endereço.")
@@ -51,5 +51,5 @@ public interface AddressDocs {
             @ApiResponse(responseCode = "401", description = "Usuario não autenticado."),
             @ApiResponse(responseCode = "403", description = "Acesso negado.")
     })
-    ResponseEntity<Void> deleteAddress(Long addressId);
+    ResponseEntity<Void> deleteAddress(User user,Long addressId);
 }

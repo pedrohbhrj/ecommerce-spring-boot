@@ -7,12 +7,12 @@ import br.com.pedrohbhrj.models.User;
 
 public interface AddressService {
 
-    AddressResponse findAddressById(Long addressId);
+    AddressResponse findAddressById(User user,Long addressId);
 
     AddressResponse createAddress(User user, AddressRequest request);
 
-    AddressResponse updateAddress(Long addressId, AddressUpdateRequest request);
+    AddressResponse updateAddress(User user,Long addressId, AddressUpdateRequest request);
 
-    void deleteAddress(Long addressId);
+    void deleteAddress(User user,Long addressId);
 
 }
