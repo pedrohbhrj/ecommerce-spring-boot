@@ -23,14 +23,18 @@ public class Payment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false,unique = true)
+    @Column(unique = true)
     private String transactionId;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "payment_status",nullable = false,length = 20)
     private PaymentStatus paymentStatus;
-    @Column(nullable = false)
+
     private BigDecimal amount;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "order_id")
+    private Order order;
 
     @CreationTimestamp
     @Column(name = "created_at")
