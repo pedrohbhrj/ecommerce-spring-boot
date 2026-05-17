@@ -43,7 +43,7 @@ public class AddressServiceImpl implements AddressService {
 
         Address addressSaved = addressRepository.save(address);
 
-        log.info("Address created successfully, with email: {}", user.getEmail());
+        log.info("Address created successfully, user id: {}",user.getId());
 
         return addressMapper.toResponse(addressSaved);
     }

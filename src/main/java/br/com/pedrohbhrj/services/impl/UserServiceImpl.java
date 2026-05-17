@@ -26,7 +26,7 @@ public class UserServiceImpl implements UserService {
 
         User user = userRepository.findById(id).orElseThrow(() -> new NotFoundException("User not found."));
 
-        log.info("User found successfully, with email: {}",user.getEmail());
+        log.info("User found successfully, id: {}",user.getId());
 
         return new UserResponse(user.getId(),user.getEmail());
     }
@@ -40,7 +40,7 @@ public class UserServiceImpl implements UserService {
 
         User userSaved = userRepository.save(user);
 
-        log.info("User updated successfully, with email: {}",userSaved.getEmail());
+        log.info("User updated successfully , id: {}",user.getId());
 
         return new UserResponse(
                 userSaved.getId(),
