@@ -56,37 +56,36 @@ public class PaymentServiceImpl implements PaymentService {
 
         List<OrderItem> list = orderItemRepository.findAllByOrderId(order.getId());
 
-
         BigDecimal total = BigDecimal.ZERO;
+
+        boolean paymentDeclined = false;
 
         for (OrderItem item : list) {
 
-            Optional<Product> productOpt = productRepository.findById(item.getProduct().getId());
+            Product product = productRepository.findById(item.getProduct().getId()).orElseThrow(() -> new NotFoundException("Product not found."));
 
-            productOpt.ifPresent(product -> {
-
-                if (item.getQuantity() > product.getStockQuantity() || product.getStockQuantity() == 0) {
-                    payment.setPaymentStatus(PaymentStatus.DECLINED);
-                    paymentRepository.save(payment);
-                    throw new StockLimitExceededException("Stock Limit exceeded");
-                }
-
-                product.setStockQuantity(product.getStockQuantity() - item.getQuantity());
-
-                productRepository.save(product);
-            });
-
-
-            if (productOpt.isEmpty()) {
-                payment.setPaymentStatus(PaymentStatus.DECLINED);
-                paymentRepository.save(payment);
-                throw new NotFoundException("Product not found");
+            if(item.getQuantity() > product.getStockQuantity()){
+                paymentDeclined = true;
+                break;
             }
 
-
-            total = total.add(item.getSubTotal());
         }
 
+        if(paymentDeclined){
+
+            payment.setPaymentStatus(PaymentStatus.DECLINED);
+            Payment paymentSaved = paymentRepository.save(payment);
+
+            return paymentMapper.toResponse(paymentSaved);
+        }
+
+        for (OrderItem item : list) {
+
+            Product product = productRepository.findById(item.getProduct().getId()).orElseThrow(() -> new NotFoundException("Product not found."));
+
+            product.setStockQuantity(product.getStockQuantity() - item.getQuantity());
+            total = total.add(item.getSubTotal());
+        }
 
         order.setTotal(total);
 
