@@ -41,7 +41,7 @@ public class UserServiceImpl implements UserService {
         userMapper.mergeUser(request,user);
 
         if(request.password() != null){
-            user.setPassword(passwordEncoder.encode(user.getPassword()));
+            user.setPassword(passwordEncoder.encode(request.password()));
         }
 
         User userSaved = userRepository.save(user);
