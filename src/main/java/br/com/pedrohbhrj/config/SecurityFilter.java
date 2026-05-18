@@ -42,7 +42,7 @@ public class SecurityFilter extends OncePerRequestFilter {
                 UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
 
                 SecurityContextHolder.getContext().setAuthentication(auth);
-                log.info("User authenticated ,email: {} , token: {}",user.getEmail(),token);
+                log.info("User authenticated with id : {}", user.getId());
             }
         }
         filterChain.doFilter(request,response);
