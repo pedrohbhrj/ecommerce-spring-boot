@@ -2,19 +2,15 @@ package br.com.pedrohbhrj.mapper;
 
 import br.com.pedrohbhrj.DTO.request.UserUpdateRequest;
 import br.com.pedrohbhrj.models.User;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.MappingTarget;
+import org.mapstruct.*;
 
 
-
-@Mapper(componentModel = "spring")
+@Mapper(
+        componentModel = "spring",
+        unmappedTargetPolicy = ReportingPolicy.IGNORE,
+        nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE
+)
 public interface UserMapper {
 
-    @Mapping(target = "id",ignore = true)
-    @Mapping(target = "roles",ignore = true)
-    @Mapping(target = "createdAt",ignore = true)
-    @Mapping(target = "updatedAt",ignore = true)
-    @Mapping(target = "authorities",ignore = true)
     void mergeUser(UserUpdateRequest request,@MappingTarget User user);
 }
