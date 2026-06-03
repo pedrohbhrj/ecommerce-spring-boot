@@ -103,7 +103,7 @@ public class PaymentServiceImpl implements PaymentService {
 
         Payment paymentSaved = paymentRepository.save(payment);
 
-        log.info("Payment created successfully, id: {}", paymentSaved.getId());
+        log.info("Payment approved successfully, id: {}", paymentSaved.getId());
 
         return paymentMapper.toResponse(paymentSaved);
     }
