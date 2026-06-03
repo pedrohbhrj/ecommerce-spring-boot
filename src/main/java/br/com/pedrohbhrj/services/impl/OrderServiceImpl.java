@@ -47,7 +47,7 @@ public class OrderServiceImpl implements OrderService {
 
                     Product product = productRepository.findById(item.productId()).orElseThrow(() -> new NotFoundException("Product not found"));
 
-                    if (item.quantity() > product.getStockQuantity() || product.getStockQuantity() == 0) {
+                    if (item.quantity() > product.getStockQuantity()) {
                         throw new StockLimitExceededException("Stock Limit exceeded");
                     }
 
