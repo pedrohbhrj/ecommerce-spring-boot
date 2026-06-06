@@ -1,8 +1,8 @@
 package br.com.pedrohbhrj.config;
 
 import br.com.pedrohbhrj.models.User;
-import br.com.pedrohbhrj.services.JWTUserData;
-import br.com.pedrohbhrj.services.TokenService;
+import br.com.pedrohbhrj.services.auth.JWTUserData;
+import br.com.pedrohbhrj.services.auth.TokenService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

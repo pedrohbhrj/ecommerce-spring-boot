@@ -74,7 +74,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<CustomErrorDetails<List<CustomFieldErrors>>> methodArgumentNotValidExceptionHandler(MethodArgumentNotValidException ex, HttpServletRequest request) {
 
-        log.error("Method argument not valid route {}: {}", request.getRequestURI(),ex.getMessage());
+        log.warn("Method argument not valid route {}: {}", request.getRequestURI(),ex.getMessage());
 
         List<CustomFieldErrors> list = ex.getBindingResult().getFieldErrors().stream().map(err -> new CustomFieldErrors(err.getField(), err.getDefaultMessage())).toList();
 

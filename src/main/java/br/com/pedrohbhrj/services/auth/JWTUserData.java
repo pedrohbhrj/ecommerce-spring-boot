@@ -1,4 +1,4 @@
-package br.com.pedrohbhrj.services;
+package br.com.pedrohbhrj.services.auth;
 
 
 import java.util.List;

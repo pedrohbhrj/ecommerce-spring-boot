@@ -9,7 +9,7 @@ import br.com.pedrohbhrj.exceptions.AlreadyExistsException;
 import br.com.pedrohbhrj.models.User;
 import br.com.pedrohbhrj.models.enums.Role;
 import br.com.pedrohbhrj.repository.UserRepository;
-import br.com.pedrohbhrj.services.TokenService;
+import br.com.pedrohbhrj.services.auth.TokenService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

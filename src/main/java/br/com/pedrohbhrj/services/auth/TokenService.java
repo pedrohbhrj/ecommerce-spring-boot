@@ -1,4 +1,4 @@
-package br.com.pedrohbhrj.services;
+package br.com.pedrohbhrj.services.auth;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
