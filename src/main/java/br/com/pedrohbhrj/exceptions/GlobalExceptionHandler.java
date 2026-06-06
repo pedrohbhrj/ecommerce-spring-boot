@@ -8,7 +8,6 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -19,7 +18,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<CustomErrorDetails<?>> exceptionHandler(Exception ex, HttpServletRequest request) {
-        log.error("Internal server error: ", ex);
+        log.error("Internal server error in route {}:{} ", request.getRequestURI(), ex.getMessage());
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
                 new CustomErrorDetails<>(
                         "INTERNAL SERVER ERROR",
@@ -34,7 +33,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(NotFoundException.class)
     public ResponseEntity<CustomErrorDetails<?>> notFoundExceptionHandler(NotFoundException ex, HttpServletRequest request) {
 
-        log.error("Entity was not found in the system: ", ex);
+        log.warn("Resource not found , route {}: {}", request.getRequestURI(), ex.getMessage());
 
         return ResponseEntity
                 .status(HttpStatus.NOT_FOUND.value())
@@ -47,7 +46,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(AlreadyExistsException.class)
     public ResponseEntity<CustomErrorDetails<?>> alreadyExistsExceptionHandler(AlreadyExistsException ex, HttpServletRequest request) {
-        log.error("Already exists this resource: ", ex);
+        log.warn("Already exists this resource route {}: {} ", request.getRequestURI(), ex.getMessage());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST.value())
                 .body(new CustomErrorDetails<>(
                         ex.getMessage(),
@@ -60,7 +59,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(StockLimitExceededException.class)
     public ResponseEntity<CustomErrorDetails<?>> limitExceededExceptionHandler(StockLimitExceededException ex, HttpServletRequest request) {
-        log.error("Stock limit exceeded : ", ex);
+        log.warn("Stock limit exceeded route {}: {}",request.getRequestURI(), ex.getMessage());
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST.value())
                 .body(new CustomErrorDetails<>(
@@ -75,9 +74,9 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<CustomErrorDetails<List<CustomFieldErrors>>> methodArgumentNotValidExceptionHandler(MethodArgumentNotValidException ex, HttpServletRequest request) {
 
-        log.error("Method argument not valid : ", ex);
+        log.error("Method argument not valid route {}: {}", request.getRequestURI(),ex.getMessage());
 
-        List<CustomFieldErrors> list = ex.getBindingResult().getFieldErrors().stream().map(err -> new CustomFieldErrors(err.getField(),err.getDefaultMessage())).toList();
+        List<CustomFieldErrors> list = ex.getBindingResult().getFieldErrors().stream().map(err -> new CustomFieldErrors(err.getField(), err.getDefaultMessage())).toList();
 
         CustomErrorDetails<List<CustomFieldErrors>> customErrorDetails = new CustomErrorDetails<>(
                 "Arguments invalid informations below.",
