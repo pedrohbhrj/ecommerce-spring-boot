@@ -26,6 +26,10 @@ email:
 password:
   admin: ${PASSWORD_ADMIN:admin}
 
+stripe:
+  secret:
+    key: ${STRIPE_SECRET}
+    
 logging:
   level:
     root: info

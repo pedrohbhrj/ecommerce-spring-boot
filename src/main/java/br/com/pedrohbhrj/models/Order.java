@@ -42,4 +42,8 @@ public class Order {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    public Long convertingIntoCents(){
+        return this.total.multiply(new BigDecimal("100")).longValue();
+    }
+
 }
