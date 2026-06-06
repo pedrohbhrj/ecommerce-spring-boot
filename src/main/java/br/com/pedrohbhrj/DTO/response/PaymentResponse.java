@@ -8,5 +8,6 @@ public record PaymentResponse (Long id,
                                String transactionId,
                                Long orderId,
                                PaymentStatus paymentStatus,
-                               BigDecimal amount){
+                               BigDecimal amount,
+                               String clientSecret){
 }

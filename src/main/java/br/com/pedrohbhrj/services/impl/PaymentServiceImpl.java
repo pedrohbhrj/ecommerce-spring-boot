@@ -2,8 +2,7 @@ package br.com.pedrohbhrj.services.impl;
 
 import br.com.pedrohbhrj.DTO.response.PaymentResponse;
 import br.com.pedrohbhrj.exceptions.NotFoundException;
-import br.com.pedrohbhrj.exceptions.StockLimitExceededException;
-import br.com.pedrohbhrj.infra.payment.StripeFakePayment;
+import br.com.pedrohbhrj.infra.payment.StripePaymentService;
 import br.com.pedrohbhrj.mapper.PaymentMapper;
 import br.com.pedrohbhrj.models.*;
 import br.com.pedrohbhrj.models.enums.OrderStatus;
@@ -13,6 +12,7 @@ import br.com.pedrohbhrj.repository.OrderRepository;
 import br.com.pedrohbhrj.repository.PaymentRepository;
 import br.com.pedrohbhrj.repository.ProductRepository;
 import br.com.pedrohbhrj.services.interf.PaymentService;
+import com.stripe.exception.StripeException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.AccessDeniedException;
@@ -20,9 +20,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
 
 @Service
 @Slf4j
@@ -39,10 +38,11 @@ public class PaymentServiceImpl implements PaymentService {
 
     private final PaymentMapper paymentMapper;
 
+    private final StripePaymentService stripePaymentService;
 
     @Override
     @Transactional
-    public PaymentResponse processPayment(User user, Long orderId) {
+    public PaymentResponse processPayment(User user, Long orderId) throws StripeException {
 
         Order order = orderRepository.findById(orderId).orElseThrow(() -> new NotFoundException("Order not found"));
 
@@ -64,14 +64,14 @@ public class PaymentServiceImpl implements PaymentService {
 
             Product product = productRepository.findById(item.getProduct().getId()).orElseThrow(() -> new NotFoundException("Product not found."));
 
-            if(item.getQuantity() > product.getStockQuantity()){
+            if (item.getQuantity() > product.getStockQuantity()) {
                 paymentDeclined = true;
                 break;
             }
 
         }
 
-        if(paymentDeclined){
+        if (paymentDeclined) {
 
             payment.setPaymentStatus(PaymentStatus.DECLINED);
             Payment paymentSaved = paymentRepository.save(payment);
@@ -89,11 +89,16 @@ public class PaymentServiceImpl implements PaymentService {
 
         order.setTotal(total);
 
-        String transaction = StripeFakePayment.processPayment();
+        Long totalInCents = order.convertingIntoCents();
 
-        payment.setTransactionId(transaction);
+        HashMap<String, String> values = stripePaymentService.processPayment(totalInCents, user.getEmail());
 
         payment.setAmount(order.getTotal());
+
+        String clientSecret = values.get("clientSecret");
+        String transaction = values.get("transactionId");
+
+        payment.setTransactionId(transaction);
 
         payment.setPaymentStatus(PaymentStatus.APPROVED);
 
@@ -105,7 +110,7 @@ public class PaymentServiceImpl implements PaymentService {
 
         log.info("Payment approved successfully, id: {}", paymentSaved.getId());
 
-        return paymentMapper.toResponse(paymentSaved);
+        return paymentMapper.toResponse(paymentSaved,clientSecret);
     }
 
     @Override
