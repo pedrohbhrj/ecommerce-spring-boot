@@ -8,4 +8,5 @@ public interface PaymentService {
 
     PaymentResponse processPayment(User user,Long orderId) throws StripeException;
     PaymentResponse findPaymentById(User user,Long orderId);
+    PaymentResponse confirmPayment(User user,Long orderId) throws StripeException;
 }

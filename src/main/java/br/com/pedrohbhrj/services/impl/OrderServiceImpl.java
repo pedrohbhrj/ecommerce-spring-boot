@@ -47,7 +47,7 @@ public class OrderServiceImpl implements OrderService {
                 .stream()
                 .map(item -> {
 
-                    Product product = productRepository.findByIdWithPessimisticLock(item.productId()).orElseThrow(() -> new NotFoundException("Product not found"));
+                    Product product = productRepository.findById(item.productId()).orElseThrow(() -> new NotFoundException("Product not found"));
 
                     if (item.quantity() > product.getStockQuantity()) {
                         throw new StockLimitExceededException("Stock Limit exceeded");

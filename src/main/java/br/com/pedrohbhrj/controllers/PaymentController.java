@@ -4,6 +4,7 @@ import br.com.pedrohbhrj.DTO.response.PaymentResponse;
 import br.com.pedrohbhrj.controllers.docs.PaymentDocs;
 import br.com.pedrohbhrj.models.User;
 import br.com.pedrohbhrj.services.interf.PaymentService;
+import com.stripe.exception.StripeException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,12 +18,18 @@ public class PaymentController implements PaymentDocs {
 
     private final PaymentService paymentService;
 
-    @PutMapping("/{orderId}")
-    public ResponseEntity<PaymentResponse> processPayment(@AuthenticationPrincipal User user, @PathVariable Long orderId){
-        return ResponseEntity.ok(paymentService.processPayment(user,orderId));
+    @PostMapping("/{orderId}")
+    public ResponseEntity<PaymentResponse> processPayment(@AuthenticationPrincipal User user, @PathVariable Long orderId) throws StripeException {
+        return ResponseEntity.status(HttpStatus.CREATED).body(paymentService.processPayment(user, orderId));
     }
+
     @GetMapping("/{orderId}")
-    public ResponseEntity<PaymentResponse> findPayment(@AuthenticationPrincipal User user,@PathVariable("orderId") Long orderId){
-        return ResponseEntity.ok(paymentService.findPaymentById(user,orderId));
+    public ResponseEntity<PaymentResponse> findPayment(@AuthenticationPrincipal User user, @PathVariable Long orderId) {
+        return ResponseEntity.ok(paymentService.findPaymentById(user, orderId));
+    }
+
+    @PutMapping("/{orderId}")
+    public ResponseEntity<PaymentResponse> confirmPayment(@AuthenticationPrincipal User user, @PathVariable Long orderId) throws StripeException {
+        return ResponseEntity.ok(paymentService.confirmPayment(user, orderId));
     }
 }

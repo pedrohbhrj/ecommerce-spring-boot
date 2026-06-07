@@ -1,7 +1,5 @@
 package br.com.pedrohbhrj.infra.payment;
 
-import br.com.pedrohbhrj.models.Payment;
-import br.com.pedrohbhrj.models.User;
 import com.stripe.exception.StripeException;
 import com.stripe.model.PaymentIntent;
 import com.stripe.param.PaymentIntentCreateParams;
@@ -12,9 +10,9 @@ import java.util.HashMap;
 @Service
 public class StripePaymentService {
 
-    public HashMap<String,String> processPayment(Long amountInCents, String userEmail) throws StripeException {
+    public HashMap<String, String> processPayment(Long amountInCents, String userEmail) throws StripeException {
 
-        HashMap<String,String> values = new HashMap<>();
+        HashMap<String, String> values = new HashMap<>();
 
         PaymentIntentCreateParams params = PaymentIntentCreateParams
                 .builder()
@@ -25,9 +23,15 @@ public class StripePaymentService {
 
         PaymentIntent intent = PaymentIntent.create(params);
 
-        values.put("transactionId",intent.getId());
-        values.put("clientSecret",intent.getClientSecret());
+        values.put("transactionId", intent.getId());
+        values.put("clientSecret", intent.getClientSecret());
 
         return values;
     }
+
+    public boolean verifyStatusPayment(String transactionId) throws StripeException {
+        PaymentIntent intent = PaymentIntent.retrieve(transactionId);
+        return "succeeded".equals(intent.getStatus());
+    }
+
 }

@@ -2,6 +2,7 @@ package br.com.pedrohbhrj.services.impl;
 
 import br.com.pedrohbhrj.DTO.response.PaymentResponse;
 import br.com.pedrohbhrj.exceptions.NotFoundException;
+import br.com.pedrohbhrj.exceptions.StockLimitExceededException;
 import br.com.pedrohbhrj.infra.payment.StripePaymentService;
 import br.com.pedrohbhrj.mapper.PaymentMapper;
 import br.com.pedrohbhrj.models.*;
@@ -52,7 +53,6 @@ public class PaymentServiceImpl implements PaymentService {
 
         Payment payment = paymentRepository.findByOrderId(order.getId()).orElseThrow(() -> new NotFoundException("Payment not found"));
 
-        payment.setPaymentStatus(PaymentStatus.PROCESSING);
 
         List<OrderItem> list = orderItemRepository.findAllByOrderId(order.getId());
 
@@ -69,6 +69,8 @@ public class PaymentServiceImpl implements PaymentService {
                 break;
             }
 
+            total = total.add(item.getSubTotal());
+
         }
 
         if (paymentDeclined) {
@@ -79,13 +81,6 @@ public class PaymentServiceImpl implements PaymentService {
             return paymentMapper.toResponse(paymentSaved);
         }
 
-        for (OrderItem item : list) {
-
-            Product product = productRepository.findByIdWithPessimisticLock(item.getProduct().getId()).orElseThrow(() -> new NotFoundException("Product not found."));
-
-            product.setStockQuantity(product.getStockQuantity() - item.getQuantity());
-            total = total.add(item.getSubTotal());
-        }
 
         order.setTotal(total);
 
@@ -100,15 +95,13 @@ public class PaymentServiceImpl implements PaymentService {
 
         payment.setTransactionId(transaction);
 
-        payment.setPaymentStatus(PaymentStatus.APPROVED);
-
-        order.setOrderStatus(OrderStatus.CONFIRMED);
+        payment.setPaymentStatus(PaymentStatus.PROCESSING);
 
         orderRepository.save(order);
 
         Payment paymentSaved = paymentRepository.save(payment);
 
-        log.info("Payment approved successfully, id: {}", paymentSaved.getId());
+        log.info("Payment intent created successfully, id: {}", paymentSaved.getId());
 
         return paymentMapper.toResponse(paymentSaved, clientSecret);
     }
@@ -125,5 +118,64 @@ public class PaymentServiceImpl implements PaymentService {
 
         log.info("Payment found successfully, id: {}", payment.getId());
         return paymentMapper.toResponse(payment);
+    }
+
+    @Transactional
+    public PaymentResponse confirmPayment(User user, Long orderId) throws StripeException {
+
+        Order order = orderRepository
+                .findById(orderId)
+                .orElseThrow(() -> new NotFoundException("Order not found."));
+
+        if (!order.getUser().getId().equals(user.getId())) {
+
+            log.warn("User unathorized tried to confirm other payment user: {} ,in order : {}", user.getId(), orderId);
+
+            throw new AccessDeniedException("Access denied.");
+        }
+
+        Payment payment = paymentRepository
+                .findByOrderId(orderId)
+                .orElseThrow(() -> new NotFoundException("Payment not found"));
+
+        if (payment.getPaymentStatus().equals(PaymentStatus.APPROVED)) {
+            return paymentMapper.toResponse(payment);
+        }
+
+        boolean isPaid = stripePaymentService.verifyStatusPayment(payment.getTransactionId());
+
+        if (!isPaid) {
+            log.warn("False attempt in confirm to the order {}.Transaction in stripe is not succeeded", orderId);
+            throw new IllegalStateException("The payment isn't is approved.");
+        }
+
+        List<OrderItem> items = orderItemRepository
+                .findAllByOrderId(orderId);
+
+        for (OrderItem item : items) {
+
+            Product product = productRepository
+                    .findByIdWithPessimisticLock(item.getProduct().getId())
+                    .orElseThrow(() -> new NotFoundException("Product not found."));
+            if (item.getQuantity() > product.getStockQuantity()) {
+                payment.setPaymentStatus(PaymentStatus.DECLINED);
+                order.setOrderStatus(OrderStatus.CANCELED);
+                paymentRepository.save(payment);
+                orderRepository.save(order);
+                throw new StockLimitExceededException("Order canceled , dont have enough stock.");
+            }
+
+            product.setStockQuantity(product.getStockQuantity() - item.getQuantity());
+            productRepository.save(product);
+
+        }
+
+        payment.setPaymentStatus(PaymentStatus.APPROVED);
+        order.setOrderStatus(OrderStatus.CONFIRMED);
+        orderRepository.save(order);
+
+        Payment paymentSaved = paymentRepository.save(payment);
+
+        return paymentMapper.toResponse(paymentSaved);
     }
 }
