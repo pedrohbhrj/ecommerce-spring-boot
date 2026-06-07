@@ -81,7 +81,7 @@ public class PaymentServiceImpl implements PaymentService {
 
         for (OrderItem item : list) {
 
-            Product product = productRepository.findById(item.getProduct().getId()).orElseThrow(() -> new NotFoundException("Product not found."));
+            Product product = productRepository.findByIdWithPessimisticLock(item.getProduct().getId()).orElseThrow(() -> new NotFoundException("Product not found."));
 
             product.setStockQuantity(product.getStockQuantity() - item.getQuantity());
             total = total.add(item.getSubTotal());
@@ -110,7 +110,7 @@ public class PaymentServiceImpl implements PaymentService {
 
         log.info("Payment approved successfully, id: {}", paymentSaved.getId());
 
-        return paymentMapper.toResponse(paymentSaved,clientSecret);
+        return paymentMapper.toResponse(paymentSaved, clientSecret);
     }
 
     @Override
